@@ -1,0 +1,179 @@
+openapi: 3.0.0
+info:
+  title: 评论管理API
+  description: 管理项目管理平台中的任务评论
+  version: 1.0.0
+
+paths:
+  /api/tasks/{taskId}/comments:
+    get:
+      summary: 获取任务的所有评论
+      description: 返回指定任务中所有评论的列表
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回评论列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '404':
+          description: 任务未找到
+        '500':
+          description: 服务器内部错误
+    post:
+      summary: 创建新评论
+      description: 在指定任务中创建一个新评论
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: 评论创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 任务未找到
+        '500':
+          description: 服务器内部错误
+
+  /api/comments/{commentId}:
+    get:
+      summary: 获取指定评论
+      description: 根据评论ID返回评论信息
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回评论信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '404':
+          description: 评论未找到
+        '500':
+          description: 服务器内部错误
+    put:
+      summary: 更新评论
+      description: 更新指定评论的内容（仅限评论作者）
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommentRequest'
+      responses:
+        '200':
+          description: 评论更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: 请求参数错误
+        '403':
+          description: 无权限编辑他人评论
+        '404':
+          description: 评论未找到
+        '500':
+          description: 服务器内部错误
+    delete:
+      summary: 删除评论
+      description: 删除指定评论（仅限评论作者）
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 评论删除成功
+        '403':
+          description: 无权限删除他人评论
+        '404':
+          description: 评论未找到
+        '500':
+          description: 服务器内部错误
+
+components:
+  schemas:
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 评论唯一标识符
+        content:
+          type: string
+          description: 评论内容
+        authorId:
+          type: string
+          description: 作者ID
+        taskId:
+          type: string
+          description: 所属任务ID
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+        updatedAt:
+          type: string
+          format: date-time
+          description: 最后更新时间
+      required:
+        - id
+        - content
+        - authorId
+        - taskId
+        - createdAt
+        - updatedAt
+
+    CreateCommentRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          description: 评论内容
+      required:
+        - content
+
+    UpdateCommentRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          description: 评论内容
+      required:
+        - content

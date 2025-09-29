@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  title: 看板管理API
+  description: 管理项目管理平台中的看板
+  version: 1.0.0
+
+paths:
+  /api/projects/{projectId}/kanban:
+    get:
+      summary: 获取项目看板
+      description: 返回指定项目的看板信息
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回看板信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KanbanBoard'
+        '404':
+          description: 项目未找到
+        '500':
+          description: 服务器内部错误
+
+components:
+  schemas:
+    KanbanBoard:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 看板唯一标识符
+        projectId:
+          type: string
+          description: 所属项目ID
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/KanbanColumn'
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+        updatedAt:
+          type: string
+          format: date-time
+          description: 最后更新时间
+      required:
+        - id
+        - projectId
+        - columns
+        - createdAt
+        - updatedAt
+
+    KanbanColumn:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 列唯一标识符
+        name:
+          type: string
+          enum: [TODO, IN_PROGRESS, REVIEW, DONE]
+          description: 列名称
+        order:
+          type: integer
+          description: 列顺序
+      required:
+        - id
+        - name
+        - order

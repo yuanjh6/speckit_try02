@@ -1,0 +1,241 @@
+openapi: 3.0.0
+info:
+  title: 任务管理API
+  description: 管理项目管理平台中的任务
+  version: 1.0.0
+
+paths:
+  /api/projects/{projectId}/tasks:
+    get:
+      summary: 获取项目的所有任务
+      description: 返回指定项目中所有任务的列表
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回任务列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '404':
+          description: 项目未找到
+        '500':
+          description: 服务器内部错误
+    post:
+      summary: 创建新任务
+      description: 在指定项目中创建一个新任务
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: 任务创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 项目未找到
+        '500':
+          description: 服务器内部错误
+
+  /api/tasks/{taskId}:
+    get:
+      summary: 获取指定任务
+      description: 根据任务ID返回任务信息
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回任务信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: 任务未找到
+        '500':
+          description: 服务器内部错误
+    put:
+      summary: 更新任务
+      description: 更新指定任务的信息
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: 任务更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 任务未找到
+        '500':
+          description: 服务器内部错误
+    delete:
+      summary: 删除任务
+      description: 删除指定任务
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 任务删除成功
+        '404':
+          description: 任务未找到
+        '500':
+          description: 服务器内部错误
+
+  /api/tasks/{taskId}/move:
+    post:
+      summary: 移动任务
+      description: 将任务移动到不同的状态列
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveTaskRequest'
+      responses:
+        '200':
+          description: 任务移动成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 任务未找到
+        '500':
+          description: 服务器内部错误
+
+components:
+  schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 任务唯一标识符
+        title:
+          type: string
+          description: 任务标题
+        description:
+          type: string
+          description: 任务描述
+        status:
+          type: string
+          enum: [TODO, IN_PROGRESS, REVIEW, DONE]
+          description: 任务状态
+        assigneeId:
+          type: string
+          description: 负责人ID
+        projectId:
+          type: string
+          description: 所属项目ID
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+        updatedAt:
+          type: string
+          format: date-time
+          description: 最后更新时间
+      required:
+        - id
+        - title
+        - status
+        - projectId
+        - createdAt
+        - updatedAt
+
+    CreateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: 任务标题
+        description:
+          type: string
+          description: 任务描述
+        status:
+          type: string
+          enum: [TODO, IN_PROGRESS, REVIEW, DONE]
+          description: 任务状态
+        assigneeId:
+          type: string
+          description: 负责人ID
+      required:
+        - title
+        - status
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: 任务标题
+        description:
+          type: string
+          description: 任务描述
+        status:
+          type: string
+          enum: [TODO, IN_PROGRESS, REVIEW, DONE]
+          description: 任务状态
+        assigneeId:
+          type: string
+          description: 负责人ID
+
+    MoveTaskRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [TODO, IN_PROGRESS, REVIEW, DONE]
+          description: 目标状态
+      required:
+        - status
